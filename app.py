@@ -108,8 +108,160 @@ elif schema_type == "Entity":
 
         schema = entity_schema
 
-# Additional elif blocks for Service, Event, Video, Blog Post, Article, and Breadcrumb Schema would go here.
+elif schema_type == "Service":
+    st.subheader("Service Schema Fields")
+    name = st.text_input("Service Name")
+    service_type = st.text_input("Service Type")
+    provider_name = st.text_input("Service Provider Name")
+    provider_url = st.text_input("Service Provider URL")
+    description = st.text_area("Description")
+    price = st.text_input("Price")
+    currency = st.text_input("Currency")
+    valid_from = st.text_input("Valid From (Date)")
 
+    if st.button("Generate Schema Markup"):
+        service_schema = {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": name,
+            "serviceType": service_type,
+            "provider": {
+                "@type": "Organization",
+                "name": provider_name,
+                "url": provider_url
+            },
+            "description": description,
+            "offers": {
+                "@type": "Offer",
+                "price": price,
+                "priceCurrency": currency,
+                "validFrom": valid_from
+            }
+        }
+        schema = service_schema
+
+elif schema_type == "Event":
+    st.subheader("Event Schema Fields")
+    name = st.text_input("Event Name")
+    start_date = st.text_input("Start Date (ISO Format)")
+    end_date = st.text_input("End Date (ISO Format)")
+    location = st.text_input("Event Location")
+    description = st.text_area("Event Description")
+    organizer_name = st.text_input("Organizer Name")
+    organizer_url = st.text_input("Organizer URL")
+    ticket_url = st.text_input("Ticket URL")
+    
+    if st.button("Generate Schema Markup"):
+        event_schema = {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": name,
+            "startDate": start_date,
+            "endDate": end_date,
+            "location": {
+                "@type": "Place",
+                "name": location
+            },
+            "description": description,
+            "organizer": {
+                "@type": "Organization",
+                "name": organizer_name,
+                "url": organizer_url
+            },
+            "offers": {
+                "@type": "Offer",
+                "url": ticket_url
+            }
+        }
+        schema = event_schema
+
+elif schema_type == "Video":
+    st.subheader("Video Schema Fields")
+    name = st.text_input("Video Title")
+    description = st.text_area("Video Description")
+    url = st.text_input("Video URL")
+    thumbnail = st.text_input("Thumbnail URL")
+    upload_date = st.text_input("Upload Date (ISO Format)")
+
+    if st.button("Generate Schema Markup"):
+        video_schema = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": name,
+            "description": description,
+            "url": url,
+            "thumbnailUrl": thumbnail,
+            "uploadDate": upload_date
+        }
+        schema = video_schema
+
+elif schema_type == "Blog Post":
+    st.subheader("Blog Post Schema Fields")
+    title = st.text_input("Blog Post Title")
+    author = st.text_input("Author Name")
+    date_published = st.text_input("Date Published (ISO Format)")
+    blog_url = st.text_input("Blog URL")
+    content = st.text_area("Content")
+    
+    if st.button("Generate Schema Markup"):
+        blog_post_schema = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": title,
+            "author": {
+                "@type": "Person",
+                "name": author
+            },
+            "datePublished": date_published,
+            "url": blog_url,
+            "articleBody": content
+        }
+        schema = blog_post_schema
+
+elif schema_type == "Article":
+    st.subheader("Article Schema Fields")
+    headline = st.text_input("Article Headline")
+    author = st.text_input("Author Name")
+    date_published = st.text_input("Date Published (ISO Format)")
+    article_url = st.text_input("Article URL")
+    article_body = st.text_area("Article Body")
+    
+    if st.button("Generate Schema Markup"):
+        article_schema = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": headline,
+            "author": {
+                "@type": "Person",
+                "name": author
+            },
+            "datePublished": date_published,
+            "url": article_url,
+            "articleBody": article_body
+        }
+        schema = article_schema
+
+elif schema_type == "Breadcrumb":
+    st.subheader("Breadcrumb Schema Fields")
+    breadcrumb_name = st.text_input("Breadcrumb Name")
+    breadcrumb_url = st.text_input("Breadcrumb URL")
+    
+    if st.button("Generate Schema Markup"):
+        breadcrumb_schema = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": breadcrumb_name,
+                    "item": breadcrumb_url
+                }
+            ]
+        }
+        schema = breadcrumb_schema
+
+# Display the generated Schema Markup
 if schema:
     st.subheader("Generated Schema Markup")
     st.code(json.dumps(schema, indent=2), language="json")
