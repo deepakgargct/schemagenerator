@@ -48,23 +48,33 @@ if schema_type == "Organization":
 
 elif schema_type == "FAQ":
     st.subheader("FAQ Schema Fields")
-    faq_question = st.text_input("FAQ Question")
-    faq_answer = st.text_area("FAQ Answer")
+
+    # Initialize the list of questions and answers
+    questions_answers = []
+
+    # Provide a button to add more questions/answers
+    num_faqs = st.number_input("How many FAQ entries would you like to add?", min_value=1, max_value=10, value=1)
+
+    for i in range(num_faqs):
+        st.subheader(f"FAQ {i + 1}")
+        question = st.text_input(f"Question {i + 1}")
+        answer = st.text_area(f"Answer {i + 1}")
+
+        # Append each question-answer pair to the list
+        questions_answers.append({
+            "@type": "Question",
+            "name": question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": answer
+            }
+        })
 
     if st.button("Generate Schema Markup"):
         faq_schema = {
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": faq_question,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": faq_answer
-                    }
-                }
-            ]
+            "mainEntity": questions_answers
         }
         schema = faq_schema
 
