@@ -1,217 +1,116 @@
-import streamlit as st
-import json
+# Place this in your main if/elif chain after the other types like Entity, FAQ, etc.
 
-st.set_page_config(page_title="Schema Markup Generator", layout="centered")
-st.title("\U0001F9E9 Schema Markup Generator")
-
-schema_type = st.selectbox(
-    "Select Schema Type", 
-    [
-        "Organization", 
-        "FAQ", 
-        "Product", 
-        "Local Business", 
-        "Entity",
-        "Service",
-        "Event",
-        "Video",
-        "Blog Post",
-        "Article",
-        "Breadcrumb"
-    ]
-)
-
-schema = {}
-
-if schema_type == "Organization":
-    st.subheader("Organization Schema Fields")
-    name = st.text_input("Organization Name")
-    url = st.text_input("Website URL")
-    logo = st.text_input("Logo URL")
-    contact = st.text_input("Contact Page URL")
-    same_as = st.text_area("SameAs URLs (comma separated)")
+elif schema_type == "Service":
+    st.subheader("Service Schema Fields")
+    service_name = st.text_input("Service Name")
+    service_description = st.text_area("Service Description")
+    service_provider_name = st.text_input("Provider Name")
+    service_area = st.text_input("Service Area")
 
     if st.button("Generate Schema Markup"):
         schema = {
             "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": name,
-            "url": url,
-            "logo": logo,
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": "customer support",
-                "url": contact
-            },
-            "sameAs": [s.strip() for s in same_as.split(",") if s.strip()]
+            "@type": "Service",
+            "name": service_name,
+            "description": service_description,
+            "provider": {
+                "@type": "Organization",
+                "name": service_provider_name,
+                "areaServed": {
+                    "@type": "Place",
+                    "name": service_area
+                }
+            }
         }
 
-elif schema_type == "FAQ":
-    st.subheader("FAQ Schema Fields")
+elif schema_type == "Event":
+    st.subheader("Event Schema Fields")
+    event_name = st.text_input("Event Name")
+    event_start = st.text_input("Start Date & Time (e.g., 2025-06-01T19:30)")
+    event_end = st.text_input("End Date & Time (optional)")
+    event_location = st.text_input("Location Name")
+    event_address = st.text_input("Location Address")
+    event_url = st.text_input("Event URL")
 
-    # Initialize the list of questions and answers
-    questions_answers = []
+    if st.button("Generate Schema Markup"):
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": event_name,
+            "startDate": event_start,
+            "endDate": event_end if event_end else None,
+            "location": {
+                "@type": "Place",
+                "name": event_location,
+                "address": event_address
+            },
+            "url": event_url
+        }
 
-    # Provide a button to add more questions/answers
-    num_faqs = st.number_input("How many FAQ entries would you like to add?", min_value=1, max_value=10, value=1)
+elif schema_type == "Video":
+    st.subheader("Video Schema Fields")
+    video_name = st.text_input("Video Name")
+    video_description = st.text_area("Video Description")
+    video_url = st.text_input("Content URL")
+    embed_url = st.text_input("Embed URL")
+    upload_date = st.text_input("Upload Date (e.g., 2025-04-01)")
+    thumbnail_url = st.text_input("Thumbnail URL")
 
-    for i in range(num_faqs):
-        st.subheader(f"FAQ {i + 1}")
-        question = st.text_input(f"Question {i + 1}")
-        answer = st.text_area(f"Answer {i + 1}")
+    if st.button("Generate Schema Markup"):
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": video_name,
+            "description": video_description,
+            "contentUrl": video_url,
+            "embedUrl": embed_url,
+            "uploadDate": upload_date,
+            "thumbnailUrl": [thumbnail_url]
+        }
 
-        # Append each question-answer pair to the list
-        questions_answers.append({
-            "@type": "Question",
-            "name": question,
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": answer
-            }
+elif schema_type == "Blog Post" or schema_type == "Article":
+    st.subheader(f"{schema_type} Schema Fields")
+    title = st.text_input("Title")
+    author = st.text_input("Author Name")
+    date_published = st.text_input("Date Published (e.g., 2025-04-01)")
+    article_body = st.text_area("Article Body")
+    url = st.text_input("Article URL")
+    image = st.text_input("Image URL")
+
+    if st.button("Generate Schema Markup"):
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting" if schema_type == "Blog Post" else "Article",
+            "headline": title,
+            "author": {
+                "@type": "Person",
+                "name": author
+            },
+            "datePublished": date_published,
+            "articleBody": article_body,
+            "mainEntityOfPage": url,
+            "image": [image]
+        }
+
+elif schema_type == "Breadcrumb":
+    st.subheader("Breadcrumb Schema Fields")
+
+    num_items = st.number_input("Number of breadcrumb items", min_value=2, max_value=10, value=3)
+    breadcrumb_list = []
+
+    for i in range(int(num_items)):
+        name = st.text_input(f"Name for Breadcrumb {i+1}")
+        item = st.text_input(f"URL for Breadcrumb {i+1}")
+        breadcrumb_list.append({
+            "@type": "ListItem",
+            "position": i + 1,
+            "name": name,
+            "item": item
         })
 
     if st.button("Generate Schema Markup"):
-        faq_schema = {
+        schema = {
             "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": questions_answers
+            "@type": "BreadcrumbList",
+            "itemListElement": breadcrumb_list
         }
-        schema = faq_schema
-
-elif schema_type == "Product":
-    st.subheader("Product Schema Fields")
-    product_name = st.text_input("Product Name")
-    product_description = st.text_area("Product Description")
-    product_sku = st.text_input("SKU")
-    product_brand = st.text_input("Brand")
-    product_category = st.text_input("Category")
-    product_price = st.text_input("Price")
-    product_currency = st.text_input("Currency")
-    product_url = st.text_input("Product URL")
-    product_image = st.text_input("Product Image URL")
-
-    if st.button("Generate Schema Markup"):
-        product_schema = {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product_name,
-            "description": product_description,
-            "sku": product_sku,
-            "brand": {
-                "@type": "Brand",
-                "name": product_brand
-            },
-            "category": product_category,
-            "offers": {
-                "@type": "Offer",
-                "price": product_price,
-                "priceCurrency": product_currency,
-                "url": product_url
-            },
-            "image": product_image
-        }
-        schema = product_schema
-
-elif schema_type == "Local Business":
-    st.subheader("Local Business Schema Fields")
-    business_name = st.text_input("Business Name")
-    business_description = st.text_area("Business Description")
-    business_url = st.text_input("Website URL")
-    business_phone = st.text_input("Phone Number")
-    business_address = st.text_input("Business Address")
-    business_city = st.text_input("City")
-    business_state = st.text_input("State")
-    business_zip = st.text_input("Zip Code")
-    business_country = st.text_input("Country")
-    business_logo = st.text_input("Logo URL")
-    business_image = st.text_input("Image URL")
-    business_opening_hours = st.text_area("Opening Hours")
-
-    if st.button("Generate Schema Markup"):
-        local_business_schema = {
-            "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            "name": business_name,
-            "description": business_description,
-            "url": business_url,
-            "telephone": business_phone,
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": business_address,
-                "addressLocality": business_city,
-                "addressRegion": business_state,
-                "postalCode": business_zip,
-                "addressCountry": business_country
-            },
-            "logo": business_logo,
-            "image": business_image,
-            "openingHours": business_opening_hours
-        }
-        schema = local_business_schema
-
-elif schema_type == "Entity":
-    st.subheader("Entity Schema Fields")
-    name = st.text_input("Entity Name")
-    url = st.text_input("Website URL")
-    logo = st.text_input("Logo URL")
-    image = st.text_input("Main Image URL")
-    description = st.text_area("Description")
-    contact_url = st.text_input("Contact Page URL")
-    keywords = st.text_area("Keywords (comma separated)")
-    knows_about = st.text_area("Knows About Topics (comma separated)")
-    subject_name_1 = st.text_input("Subject 1 Name")
-    subject_sameas_1 = st.text_input("Subject 1 SameAs URL")
-    subject_name_2 = st.text_input("Subject 2 Name")
-    subject_sameas_2 = st.text_input("Subject 2 SameAs URL")
-    same_as = st.text_area("SameAs URLs (comma separated)")
-    parent_name = st.text_input("Parent Organization Name (optional)")
-    parent_url = st.text_input("Parent Organization URL (optional)")
-    parent_area_served = st.text_input("Parent Area Served (optional)")
-    parent_description = st.text_area("Parent Organization Description (optional)")
-
-    if st.button("Generate Schema Markup"):
-        entity_schema = {
-            "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            "name": name,
-            "description": description,
-            "url": url,
-            "logo": logo,
-            "image": [image],
-            "sameAs": [s.strip() for s in same_as.split(",") if s.strip()],
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": ["Contact Sales"],
-                "url": contact_url
-            },
-            "subjectOf": [
-                {
-                    "@type": "CreativeWork",
-                    "name": subject_name_1,
-                    "sameAs": subject_sameas_1
-                },
-                {
-                    "@type": "CreativeWork",
-                    "name": subject_name_2,
-                    "sameAs": subject_sameas_2
-                }
-            ],
-            "knowsAbout": [k.strip() for k in knows_about.split(",") if k.strip()],
-            "keywords": [k.strip() for k in keywords.split(",") if k.strip()]
-        }
-
-        if parent_name:
-            entity_schema["parentOrganization"] = {
-                "@type": "Organization",
-                "name": parent_name,
-                "url": parent_url,
-                "areaServed": parent_area_served,
-                "description": parent_description
-            }
-
-        schema = entity_schema
-
-# Display the generated Schema Markup
-if schema:
-    st.subheader("Generated Schema Markup")
-    st.code(json.dumps(schema, indent=2), language="json")
