@@ -45,8 +45,8 @@ def generate_local_business():
 
 # Function to generate Entity schema
 def generate_entity():
-  st.subheader("Entity (LocalBusiness) Schema Markup")
-   name = st.text_input("Business Name")
+    st.subheader("Entity (LocalBusiness) Schema Markup")
+    name = st.text_input("Business Name")
     description = st.text_area("Description")
     url = st.text_input("Website URL")
     logo = st.text_input("Logo URL")
@@ -124,7 +124,6 @@ def generate_entity():
                 "areaServed": parent_area_served,
                 "description": parent_description
             }
-        }
         }
         st.code(json.dumps(entity_schema, indent=2), language="json")
 
