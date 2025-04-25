@@ -119,13 +119,184 @@ def generate_entity():
 
         st.code(json.dumps(entity_schema, indent=2), language="json")
 
-def generate_placeholder(schema_name):
-    st.subheader(f"{schema_name} Schema Markup")
-    st.info(f"The schema fields for {schema_name} are coming soon!")
+def generate_product():
+    st.subheader("Product Schema Markup")
+    name = st.text_input("Product Name")
+    description = st.text_area("Product Description")
+    sku = st.text_input("SKU (Stock Keeping Unit)")
+    brand = st.text_input("Brand")
+    price = st.number_input("Price", min_value=0.0, format="%.2f")
+    currency = st.text_input("Currency (e.g., USD)")
+    availability = st.selectbox("Availability", ["InStock", "OutOfStock", "PreOrder"])
+    product_url = st.text_input("Product URL")
+    image_url = st.text_input("Product Image URL")
 
+    if st.button("Generate JSON-LD", key="product_btn"):
+        product_schema = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": name,
+            "description": description,
+            "sku": sku,
+            "brand": brand,
+            "offers": {
+                "@type": "Offer",
+                "price": price,
+                "priceCurrency": currency,
+                "availability": f"https://schema.org/{availability}",
+                "url": product_url
+            },
+            "image": image_url
+        }
+        st.code(json.dumps(product_schema, indent=2), language="json")
+
+def generate_service():
+    st.subheader("Service Schema Markup")
+    service_name = st.text_input("Service Name")
+    service_description = st.text_area("Service Description")
+    service_provider = st.text_input("Service Provider")
+    service_url = st.text_input("Service URL")
+
+    if st.button("Generate JSON-LD", key="service_btn"):
+        service_schema = {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": service_name,
+            "description": service_description,
+            "provider": {
+                "@type": "Organization",
+                "name": service_provider
+            },
+            "url": service_url
+        }
+        st.code(json.dumps(service_schema, indent=2), language="json")
+
+# Event Schema
+def generate_event():
+    st.subheader("Event Schema Markup")
+    event_name = st.text_input("Event Name")
+    event_description = st.text_area("Event Description")
+    start_date = st.date_input("Start Date")
+    end_date = st.date_input("End Date")
+    location_name = st.text_input("Event Location Name")
+    street_address = st.text_input("Street Address")
+    city = st.text_input("City")
+    state = st.text_input("State")
+    postal_code = st.text_input("Postal Code")
+    country = st.text_input("Country")
+
+    if st.button("Generate JSON-LD", key="event_btn"):
+        event_schema = {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": event_name,
+            "description": event_description,
+            "startDate": start_date.isoformat(),
+            "endDate": end_date.isoformat(),
+            "location": {
+                "@type": "Place",
+                "name": location_name,
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": street_address,
+                    "addressLocality": city,
+                    "addressRegion": state,
+                    "postalCode": postal_code,
+                    "addressCountry": country
+                }
+            }
+        }
+        st.code(json.dumps(event_schema, indent=2), language="json")
+
+# Video Schema
+def generate_video():
+    st.subheader("Video Schema Markup")
+    video_name = st.text_input("Video Name")
+    description = st.text_area("Video Description")
+    video_url = st.text_input("Video URL")
+    upload_date = st.date_input("Upload Date")
+    duration = st.text_input("Duration (e.g., PT15M for 15 minutes)")
+
+    if st.button("Generate JSON-LD", key="video_btn"):
+        video_schema = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": video_name,
+            "description": description,
+            "url": video_url,
+            "uploadDate": upload_date.isoformat(),
+            "duration": duration
+        }
+        st.code(json.dumps(video_schema, indent=2), language="json")
+
+# Blog Post Schema
+def generate_blog_post():
+    st.subheader("Blog Post Schema Markup")
+    title = st.text_input("Blog Post Title")
+    description = st.text_area("Blog Post Description")
+    author = st.text_input("Author")
+    date_published = st.date_input("Date Published")
+    article_body = st.text_area("Article Body")
+
+    if st.button("Generate JSON-LD", key="blog_post_btn"):
+        blog_post_schema = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": title,
+            "description": description,
+            "author": {
+                "@type": "Person",
+                "name": author
+            },
+            "datePublished": date_published.isoformat(),
+            "articleBody": article_body
+        }
+        st.code(json.dumps(blog_post_schema, indent=2), language="json")
+
+# Breadcrumb Schema
+def generate_breadcrumb():
+    st.subheader("Breadcrumb Schema Markup")
+    breadcrumb_items = []
+    count = st.number_input("How many Breadcrumbs do you want to add?", min_value=1, max_value=10, value=1)
+
+    for i in range(count):
+        with st.expander(f"Breadcrumb {i+1}"):
+            name = st.text_input(f"Breadcrumb Name {i+1}", key=f"b_name{i}")
+            url = st.text_input(f"Breadcrumb URL {i+1}", key=f"b_url{i}")
+            if name and url:
+                breadcrumb_items.append({
+                    "@type": "ListItem",
+                    "position": i + 1,
+                    "name": name,
+                    "item": url
+                })
+
+    if breadcrumb_items and st.button("Generate JSON-LD", key="breadcrumb_btn"):
+        breadcrumb_schema = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": breadcrumb_items
+        }
+        st.code(json.dumps(breadcrumb_schema, indent=2), language="json")
+
+# Select Schema Type
 if schema_type == "FAQ":
     generate_faq()
 elif schema_type == "Entity":
     generate_entity()
+elif schema_type == "Product":
+    generate_product()
+elif schema_type == "Service":
+    generate_service()
+elif schema_type == "Event":
+    generate_event()
+elif schema_type == "Video":
+    generate_video()
+elif schema_type == "Blog Post":
+    generate_blog_post()
+elif schema_type == "Article":
+    generate_blog_post()  # Same structure as Blog Post for simplicity
+elif schema_type == "Breadcrumb":
+    generate_breadcrumb()
 else:
-    generate_placeholder(schema_type)
+    st.info("Please select a valid schema type.")
