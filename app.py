@@ -1,136 +1,78 @@
 import streamlit as st
 import json
 
-st.set_page_config(page_title="Schema Markup Generator", layout="wide")
-st.title("Schema Markup Generator")
-
-schema_type = st.selectbox("Select Schema Type", [
-    "FAQ", "Entity", "Product", "Local Business", "Service", "Event", "Video", "Blog Post", "Article", "Breadcrumb"
-])
-
-def generate_faq():
-    st.subheader("FAQ Schema Markup")
-    faq_items = []
-    count = st.number_input("How many FAQs do you want to add?", min_value=1, max_value=20, value=1)
-
-    for i in range(count):
-        with st.expander(f"FAQ {i+1}"):
-            question = st.text_input(f"Question {i+1}", key=f"q{i}")
-            answer = st.text_area(f"Answer {i+1}", key=f"a{i}")
-            if question and answer:
-                faq_items.append({
-                    "@type": "Question",
-                    "name": question,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": answer
-                    }
-                })
-
-    if faq_items and st.button("Generate JSON-LD", key="faq_btn"):
-        faq_schema = {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faq_items
-        }
-        st.code(json.dumps(faq_schema, indent=2), language="json")
-
-def generate_entity():
-    st.subheader("Entity (LocalBusiness) Schema Markup")
+# Function to generate Local Business schema
+def generate_local_business():
+    st.subheader("Local Business Schema Markup")
     name = st.text_input("Business Name")
-    description = st.text_area("Description")
-    url = st.text_input("Website URL")
+    description = st.text_area("Business Description")
+    url = st.text_input("Business Website URL")
     logo = st.text_input("Logo URL")
-    image_urls = st.text_area("Image URLs (comma-separated)")
+    image = st.text_input("Image URL")
     same_as = st.text_area("SameAs URLs (comma-separated)")
-
-    contact_type = st.text_input("Contact Type")
-    contact_url = st.text_input("Contact Page URL")
-
-    subject_names = st.text_area("Subject Names (comma-separated)")
-    subject_urls = st.text_area("Subject URLs (comma-separated)")
-
-    knows_about = st.text_area("Knows About (comma-separated)")
-    keywords = st.text_area("Keywords (comma-separated)")
-
+    telephone = st.text_input("Business Phone Number")
+    email = st.text_input("Business Email")
     street_address = st.text_input("Street Address")
-    locality = st.text_input("City / Locality")
-    region = st.text_input("Region / State")
+    city = st.text_input("City / Locality")
+    region = st.text_input("State / Region")
     postal_code = st.text_input("Postal Code")
     country = st.text_input("Country")
+    hours_of_operation = st.text_area("Business Hours (e.g., Mon-Fri 9AM-5PM)")
 
-    latitude = st.text_input("Latitude")
-    longitude = st.text_input("Longitude")
-    map_url = st.text_input("Map URL")
-
-    parent_name = st.text_input("Parent Org Name")
-    parent_url = st.text_input("Parent Org URL")
-    parent_area_served = st.text_input("Area Served")
-    parent_description = st.text_area("Parent Org Description")
-
-    if st.button("Generate JSON-LD", key="entity_btn"):
-        entity_schema = {
+    if st.button("Generate JSON-LD", key="local_business_btn"):
+        local_business_schema = {
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
             "name": name,
             "description": description,
             "url": url,
             "logo": logo,
-            "image": [i.strip() for i in image_urls.split(",") if i.strip()],
+            "image": image,
             "sameAs": [s.strip() for s in same_as.split(",") if s.strip()],
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": [contact_type],
-                "url": contact_url
-            },
-            "subjectOf": [
-                {
-                    "@type": "CreativeWork",
-                    "name": n.strip(),
-                    "sameAs": u.strip()
-                }
-                for n, u in zip(subject_names.split(","), subject_urls.split(","))
-                if n.strip() and u.strip()
-            ],
-            "knowsAbout": [k.strip() for k in knows_about.split(",") if k.strip()],
-            "keywords": [k.strip() for k in keywords.split(",") if k.strip()],
+            "telephone": telephone,
+            "email": email,
             "address": {
                 "@type": "PostalAddress",
                 "streetAddress": street_address,
-                "addressLocality": locality,
+                "addressLocality": city,
                 "addressRegion": region,
                 "postalCode": postal_code,
                 "addressCountry": country
             },
-            "geo": {
-                "@type": "GeoCoordinates",
-                "latitude": latitude,
-                "longitude": longitude
-            },
-            "hasMap": map_url,
-            "parentOrganization": {
-                "@type": "Organization",
-                "name": parent_name,
-                "url": parent_url,
-                "areaServed": parent_area_served,
-                "description": parent_description
-            }
+            "openingHours": hours_of_operation
         }
+        st.code(json.dumps(local_business_schema, indent=2), language="json")
 
-        st.code(json.dumps(entity_schema, indent=2), language="json")
+# Function to generate FAQ schema
+def generate_faq():
+    st.subheader("FAQ Schema Markup")
+    questions = st.number_input("How many questions to add?", min_value=1, step=1)
+    
+    faq_list = []
+    for i in range(questions):
+        question = st.text_input(f"Question {i+1}")
+        answer = st.text_area(f"Answer {i+1}")
+        faq_list.append({"@type": "Question", "name": question, "acceptedAnswer": {"@type": "Answer", "text": answer}})
+    
+    if st.button("Generate JSON-LD", key="faq_btn"):
+        faq_schema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faq_list
+        }
+        st.code(json.dumps(faq_schema, indent=2), language="json")
 
+# Function to generate Product schema
 def generate_product():
     st.subheader("Product Schema Markup")
     name = st.text_input("Product Name")
     description = st.text_area("Product Description")
-    sku = st.text_input("SKU (Stock Keeping Unit)")
-    brand = st.text_input("Brand")
-    price = st.number_input("Price", min_value=0.0, format="%.2f")
-    currency = st.text_input("Currency (e.g., USD)")
+    sku = st.text_input("Product SKU")
+    price = st.number_input("Product Price", min_value=0.0, step=0.01)
+    currency = st.selectbox("Currency", ["USD", "EUR", "GBP", "INR", "AUD"])
     availability = st.selectbox("Availability", ["InStock", "OutOfStock", "PreOrder"])
-    product_url = st.text_input("Product URL")
-    image_url = st.text_input("Product Image URL")
-
+    url = st.text_input("Product URL")
+    
     if st.button("Generate JSON-LD", key="product_btn"):
         product_schema = {
             "@context": "https://schema.org",
@@ -138,152 +80,156 @@ def generate_product():
             "name": name,
             "description": description,
             "sku": sku,
-            "brand": brand,
             "offers": {
                 "@type": "Offer",
-                "price": price,
+                "url": url,
                 "priceCurrency": currency,
-                "availability": f"https://schema.org/{availability}",
-                "url": product_url
-            },
-            "image": image_url
+                "price": price,
+                "availability": f"https://schema.org/{availability}"
+            }
         }
         st.code(json.dumps(product_schema, indent=2), language="json")
 
+# Function to generate Service schema
 def generate_service():
     st.subheader("Service Schema Markup")
-    service_name = st.text_input("Service Name")
-    service_description = st.text_area("Service Description")
-    service_provider = st.text_input("Service Provider")
-    service_url = st.text_input("Service URL")
+    name = st.text_input("Service Name")
+    description = st.text_area("Service Description")
+    service_type = st.text_input("Service Type (e.g., Online, In-person)")
+    url = st.text_input("Service Website URL")
 
     if st.button("Generate JSON-LD", key="service_btn"):
         service_schema = {
             "@context": "https://schema.org",
             "@type": "Service",
-            "name": service_name,
-            "description": service_description,
-            "provider": {
-                "@type": "Organization",
-                "name": service_provider
-            },
-            "url": service_url
+            "name": name,
+            "description": description,
+            "serviceType": service_type,
+            "url": url
         }
         st.code(json.dumps(service_schema, indent=2), language="json")
 
-# Event Schema
+# Function to generate Event schema
 def generate_event():
     st.subheader("Event Schema Markup")
-    event_name = st.text_input("Event Name")
-    event_description = st.text_area("Event Description")
-    start_date = st.date_input("Start Date")
-    end_date = st.date_input("End Date")
-    location_name = st.text_input("Event Location Name")
-    street_address = st.text_input("Street Address")
-    city = st.text_input("City")
-    state = st.text_input("State")
-    postal_code = st.text_input("Postal Code")
-    country = st.text_input("Country")
-
+    name = st.text_input("Event Name")
+    description = st.text_area("Event Description")
+    start_date = st.text_input("Event Start Date (ISO 8601 format)")
+    end_date = st.text_input("Event End Date (ISO 8601 format)")
+    location = st.text_input("Event Location")
+    
     if st.button("Generate JSON-LD", key="event_btn"):
         event_schema = {
             "@context": "https://schema.org",
             "@type": "Event",
-            "name": event_name,
-            "description": event_description,
-            "startDate": start_date.isoformat(),
-            "endDate": end_date.isoformat(),
+            "name": name,
+            "description": description,
+            "startDate": start_date,
+            "endDate": end_date,
             "location": {
                 "@type": "Place",
-                "name": location_name,
-                "address": {
-                    "@type": "PostalAddress",
-                    "streetAddress": street_address,
-                    "addressLocality": city,
-                    "addressRegion": state,
-                    "postalCode": postal_code,
-                    "addressCountry": country
-                }
+                "name": location
             }
         }
         st.code(json.dumps(event_schema, indent=2), language="json")
 
-# Video Schema
+# Function to generate Video schema
 def generate_video():
     st.subheader("Video Schema Markup")
-    video_name = st.text_input("Video Name")
+    name = st.text_input("Video Name")
     description = st.text_area("Video Description")
-    video_url = st.text_input("Video URL")
-    upload_date = st.date_input("Upload Date")
-    duration = st.text_input("Duration (e.g., PT15M for 15 minutes)")
+    upload_date = st.text_input("Video Upload Date (ISO 8601 format)")
+    duration = st.text_input("Video Duration (e.g., PT2H for 2 hours)")
 
     if st.button("Generate JSON-LD", key="video_btn"):
         video_schema = {
             "@context": "https://schema.org",
             "@type": "VideoObject",
-            "name": video_name,
+            "name": name,
             "description": description,
-            "url": video_url,
-            "uploadDate": upload_date.isoformat(),
+            "uploadDate": upload_date,
             "duration": duration
         }
         st.code(json.dumps(video_schema, indent=2), language="json")
 
-# Blog Post Schema
+# Function to generate Blog Post schema
 def generate_blog_post():
     st.subheader("Blog Post Schema Markup")
-    title = st.text_input("Blog Post Title")
-    description = st.text_area("Blog Post Description")
-    author = st.text_input("Author")
-    date_published = st.date_input("Date Published")
-    article_body = st.text_area("Article Body")
-
+    headline = st.text_input("Headline")
+    description = st.text_area("Description")
+    date_published = st.text_input("Date Published (ISO 8601 format)")
+    author = st.text_input("Author Name")
+    
     if st.button("Generate JSON-LD", key="blog_post_btn"):
         blog_post_schema = {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            "headline": title,
+            "headline": headline,
             "description": description,
+            "datePublished": date_published,
             "author": {
                 "@type": "Person",
                 "name": author
-            },
-            "datePublished": date_published.isoformat(),
-            "articleBody": article_body
+            }
         }
         st.code(json.dumps(blog_post_schema, indent=2), language="json")
 
-# Breadcrumb Schema
+# Function to generate Article schema
+def generate_article():
+    st.subheader("Article Schema Markup")
+    headline = st.text_input("Headline")
+    description = st.text_area("Description")
+    date_published = st.text_input("Date Published (ISO 8601 format)")
+    author = st.text_input("Author Name")
+
+    if st.button("Generate JSON-LD", key="article_btn"):
+        article_schema = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": headline,
+            "description": description,
+            "datePublished": date_published,
+            "author": {
+                "@type": "Person",
+                "name": author
+            }
+        }
+        st.code(json.dumps(article_schema, indent=2), language="json")
+
+# Function to generate Breadcrumb schema
 def generate_breadcrumb():
     st.subheader("Breadcrumb Schema Markup")
-    breadcrumb_items = []
-    count = st.number_input("How many Breadcrumbs do you want to add?", min_value=1, max_value=10, value=1)
-
-    for i in range(count):
-        with st.expander(f"Breadcrumb {i+1}"):
-            name = st.text_input(f"Breadcrumb Name {i+1}", key=f"b_name{i}")
-            url = st.text_input(f"Breadcrumb URL {i+1}", key=f"b_url{i}")
-            if name and url:
-                breadcrumb_items.append({
-                    "@type": "ListItem",
-                    "position": i + 1,
-                    "name": name,
-                    "item": url
-                })
-
-    if breadcrumb_items and st.button("Generate JSON-LD", key="breadcrumb_btn"):
+    item_name = st.text_input("Item Name")
+    item_url = st.text_input("Item URL")
+    
+    breadcrumb_list = []
+    breadcrumb_list.append({
+        "@type": "ListItem",
+        "position": 1,
+        "name": item_name,
+        "item": item_url
+    })
+    
+    if st.button("Generate JSON-LD", key="breadcrumb_btn"):
         breadcrumb_schema = {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
-            "itemListElement": breadcrumb_items
+            "itemListElement": breadcrumb_list
         }
         st.code(json.dumps(breadcrumb_schema, indent=2), language="json")
 
-# Select Schema Type
-if schema_type == "FAQ":
+# Streamlit Interface
+st.title("Schema Markup Generator")
+
+schema_type = st.selectbox("Select Schema Type", [
+    "Local Business", "FAQ", "Product", "Service", "Event", 
+    "Video", "Blog Post", "Article", "Breadcrumb"
+])
+
+if schema_type == "Local Business":
+    generate_local_business()
+elif schema_type == "FAQ":
     generate_faq()
-elif schema_type == "Entity":
-    generate_entity()
 elif schema_type == "Product":
     generate_product()
 elif schema_type == "Service":
@@ -295,8 +241,6 @@ elif schema_type == "Video":
 elif schema_type == "Blog Post":
     generate_blog_post()
 elif schema_type == "Article":
-    generate_blog_post()  # Same structure as Blog Post for simplicity
+    generate_article()
 elif schema_type == "Breadcrumb":
     generate_breadcrumb()
-else:
-    st.info("Please select a valid schema type.")
