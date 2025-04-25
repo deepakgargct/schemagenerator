@@ -43,6 +43,91 @@ def generate_local_business():
         }
         st.code(json.dumps(local_business_schema, indent=2), language="json")
 
+# Function to generate Entity schema
+def generate_entity():
+  st.subheader("Entity (LocalBusiness) Schema Markup")
+    name = st.text_input("Business Name")
+    description = st.text_area("Description")
+    url = st.text_input("Website URL")
+    logo = st.text_input("Logo URL")
+    image_urls = st.text_area("Image URLs (comma-separated)")
+    same_as = st.text_area("SameAs URLs (comma-separated)")
+
+    contact_type = st.text_input("Contact Type")
+    contact_url = st.text_input("Contact Page URL")
+
+    subject_names = st.text_area("Subject Names (comma-separated)")
+    subject_urls = st.text_area("Subject URLs (comma-separated)")
+
+    knows_about = st.text_area("Knows About (comma-separated)")
+    keywords = st.text_area("Keywords (comma-separated)")
+
+    street_address = st.text_input("Street Address")
+    locality = st.text_input("City / Locality")
+    region = st.text_input("Region / State")
+    postal_code = st.text_input("Postal Code")
+    country = st.text_input("Country")
+
+    latitude = st.text_input("Latitude")
+    longitude = st.text_input("Longitude")
+    map_url = st.text_input("Map URL")
+
+    parent_name = st.text_input("Parent Org Name")
+    parent_url = st.text_input("Parent Org URL")
+    parent_area_served = st.text_input("Area Served")
+    parent_description = st.text_area("Parent Org Description")
+
+    if st.button("Generate JSON-LD", key="entity_btn"):
+        entity_schema = {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": name,
+            "description": description,
+            "url": url,
+            "logo": logo,
+            "image": [i.strip() for i in image_urls.split(",") if i.strip()],
+            "sameAs": [s.strip() for s in same_as.split(",") if s.strip()],
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": [contact_type],
+                "url": contact_url
+            },
+            "subjectOf": [
+                {
+                    "@type": "CreativeWork",
+                    "name": n.strip(),
+                    "sameAs": u.strip()
+                }
+                for n, u in zip(subject_names.split(","), subject_urls.split(","))
+                if n.strip() and u.strip()
+            ],
+            "knowsAbout": [k.strip() for k in knows_about.split(",") if k.strip()],
+            "keywords": [k.strip() for k in keywords.split(",") if k.strip()],
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": street_address,
+                "addressLocality": locality,
+                "addressRegion": region,
+                "postalCode": postal_code,
+                "addressCountry": country
+            },
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": latitude,
+                "longitude": longitude
+            },
+            "hasMap": map_url,
+            "parentOrganization": {
+                "@type": "Organization",
+                "name": parent_name,
+                "url": parent_url,
+                "areaServed": parent_area_served,
+                "description": parent_description
+            }
+        }
+        }
+        st.code(json.dumps(entity_schema, indent=2), language="json")
+
 # Function to generate FAQ schema
 def generate_faq():
     st.subheader("FAQ Schema Markup")
@@ -222,11 +307,13 @@ def generate_breadcrumb():
 st.title("Schema Markup Generator")
 
 schema_type = st.selectbox("Select Schema Type", [
-    "Local Business", "FAQ", "Product", "Service", "Event", 
+    "Entity", "Local Business", "FAQ", "Product", "Service", "Event", 
     "Video", "Blog Post", "Article", "Breadcrumb"
 ])
 
-if schema_type == "Local Business":
+if schema_type == "Entity":
+    generate_entity()
+elif schema_type == "Local Business":
     generate_local_business()
 elif schema_type == "FAQ":
     generate_faq()
